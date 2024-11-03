@@ -1,11 +1,10 @@
 FROM python:3.12
-EXPOSE 5000
+# EXPOSE 5000 # Remove "EXPOSE 5000" since gunicorn would run on port 80
 WORKDIR /app
-# COPY requirements.txt sperately caches requirements in such
-# a way that, it won't have to rerun everytime you change other 
-# parts of the code, also with pip install.
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+# RUN pip install -r requirements.txt #Use the cmd line above instead, 
+# prevents pip from using the cached outdated package.
 COPY . .
-CMD ["flask", "run", "--host", "0.0.0.0"]
-
+# CMD ["flask", "run", "--host", "0.0.0.0"] # Not efficient
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "app.create_app()"]

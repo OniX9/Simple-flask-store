@@ -7,4 +7,5 @@
 - Flask-smorest
 - SqlAlchemy
 - Docker
-and so much more 
+
+### and so much more
