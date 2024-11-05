@@ -3,8 +3,10 @@ from pathlib import Path
 from flask import Flask, jsonify
 from flask_smorest import Api
 from blocklist import BLOCKLIST
-# from flask_migrate import Migrate
+from dotenv import load_dotenv
+from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+
 from resources.tag import blp as TagBlueprint
 from resources.item import blp as ItemBlueprint
 from resources.store import blp as StoreBlueprint
@@ -17,7 +19,8 @@ import models
 def create_app(db_url= None):
     # Put flask app in a method, so that you can easily create other instances, especially when testing.
     app = Flask(__name__)
-
+    load_dotenv()
+    
     app.config["PROPAGATE_EXCEPTIONS"] = True
     app.config["API_TITLE"] = "Store Rest API"
     app.config["API_VERSION"] = "v1"

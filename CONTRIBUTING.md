@@ -15,3 +15,5 @@ docker run -dp 5007:5000 -w /app -v '$(pwd):/app' flask_deployment_image sh -c "
 ```
 docker rename '<container_autogen_name> simple_flask_store
 ```
+
+## 4. a .env file is needed to run code properly.
