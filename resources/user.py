@@ -1,13 +1,15 @@
+from blocklist import BLOCKLIST
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt, get_jwt_identity
-from blocklist import BLOCKLIST
 
 from db import db
 from models import UserModel
-from schemas import UserSchema
+from flask import current_app
+from tasks import send_user_registered_email
+from schemas import UserSchema, UserRegisterSchema
 
 blp = Blueprint("Users", __name__, "Operations on users")      
 
@@ -39,23 +41,34 @@ class TokenRefresh(MethodView):
 
 @blp.route("/register")
 class UserRegister(MethodView):
-    @blp.arguments(UserSchema)
-    @blp.response(201, UserSchema)
+    @blp.arguments(UserRegisterSchema)
+    @blp.response(201, UserRegisterSchema)
     def post(self, user_data):
         username = user_data["username"]
+        email = user_data["email"]
         password = user_data["password"]
         # user = UserModel.query.get(username)
         
-        if UserModel.query.filter(UserModel.username == username).first():
-            abort(409, message= "Username already exists")
+        from sqlalchemy import or_
+
+        # or_ aids to checks if username or email exists
+        if UserModel.query.filter(
+            or_ (UserModel.username == username, UserModel.email == email)
+            ).first():
+            abort(409, message= "Username or email already exists")
         
         user = UserModel(
             username = username,
+            email = email,
             password = pbkdf2_sha256.hash(password)
         )
 
         db.session.add(user)
         db.session.commit()
+
+        
+        # send_user_registered_email(user.email, user.username) # WITHOUT QUEUE
+        current_app.queue.enqueue(send_user_registered_email, user.email, user.username)
 
         return user  # Check if password is not returned based on the Schema
         # return {"message": "User created successfully."}, 201

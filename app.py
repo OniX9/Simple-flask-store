@@ -1,4 +1,7 @@
 import os
+import redis
+import models
+from db import db # SQLAlchemy instance
 from pathlib import Path
 from flask import Flask, jsonify
 from flask_smorest import Api
@@ -6,21 +9,24 @@ from blocklist import BLOCKLIST
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from rq import Queue
 
 from resources.tag import blp as TagBlueprint
 from resources.item import blp as ItemBlueprint
 from resources.store import blp as StoreBlueprint
 from resources.user import blp as UserBlueprint
 
-# SQLAlchemy imports
-from db import db # SQLAlchemy instance
-import models
 
 def create_app(db_url= None):
     # Put flask app in a method, so that you can easily create other instances, especially when testing.
     app = Flask(__name__)
     load_dotenv()
     
+    connection = redis.from_url(
+        os.getenv("REDIS_URL")
+    )
+
+    app.queue = Queue("emails", connection= connection)
     app.config["PROPAGATE_EXCEPTIONS"] = True
     app.config["API_TITLE"] = "Store Rest API"
     app.config["API_VERSION"] = "v1"

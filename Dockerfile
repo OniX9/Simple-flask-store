@@ -7,4 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # prevents pip from using the cached outdated package.
 COPY . .
 # CMD ["flask", "run", "--host", "0.0.0.0"] # Not efficient
+# CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:create_app()"]
+# The above script is used in docker-entrypoint.sh instead.
 CMD ["/bin/bash", "docker-entrypoint.sh"]
