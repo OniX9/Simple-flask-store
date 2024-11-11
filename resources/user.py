@@ -67,8 +67,8 @@ class UserRegister(MethodView):
         db.session.commit()
 
         
-        # send_user_registered_email(user.email, user.username) # WITHOUT QUEUE
-        current_app.queue.enqueue(send_user_registered_email, user.email, user.username)
+        send_user_registered_email(user.email, user.username) # WITHOUT QUEUE
+        # current_app.queue.enqueue(send_user_registered_email, user.email, user.username)
 
         return user  # Check if password is not returned based on the Schema
         # return {"message": "User created successfully."}, 201
