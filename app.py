@@ -9,7 +9,7 @@ from blocklist import BLOCKLIST
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from rq import Queue
+# from rq import Queue
 
 from resources.tag import blp as TagBlueprint
 from resources.item import blp as ItemBlueprint
@@ -22,11 +22,11 @@ def create_app(db_url= None):
     app = Flask(__name__)
     load_dotenv()
     
-    connection = redis.from_url(
-        os.getenv("REDIS_URL")
-    )
+    # connection = redis.from_url(
+    #     os.getenv("REDIS_URL")
+    # )
 
-    app.queue = Queue("emails", connection= connection)
+    # app.queue = Queue("emails", connection= connection)
     app.config["PROPAGATE_EXCEPTIONS"] = True
     app.config["API_TITLE"] = "Store Rest API"
     app.config["API_VERSION"] = "v1"

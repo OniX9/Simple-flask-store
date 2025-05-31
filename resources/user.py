@@ -8,7 +8,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 from db import db
 from models import UserModel
 from flask import current_app
-from tasks import send_user_registered_email
+# from tasks import send_user_registered_email
 from schemas import UserSchema, UserRegisterSchema
 
 blp = Blueprint("Users", __name__, "Operations on users")      
@@ -22,10 +22,13 @@ class UserLogin(MethodView):
         password = user_data["password"]
 
         user = UserModel.query.filter(UserModel.username == username).first()
+        print(f"BEFORE ATTACK USER: {user.username}, PSWD: {user.password}")
 
         if user and pbkdf2_sha256.verify(password, user.password):
             access_token = create_access_token(identity = user.id, fresh= True)
             refresh_token = create_refresh_token(identity = user.id)
+            print(f"BEFORE ATTACK USER: {user.username}, PSWD: {user.password}")
+
             return {"access_token": access_token, "refresh_token": refresh_token}
 
 
@@ -67,7 +70,7 @@ class UserRegister(MethodView):
         db.session.commit()
 
         
-        send_user_registered_email(user.email, user.username) # WITHOUT QUEUE
+        # send_user_registered_email(user.email, user.username) # WITHOUT QUEUE
         # current_app.queue.enqueue(send_user_registered_email, user.email, user.username)
 
         return user  # Check if password is not returned based on the Schema
